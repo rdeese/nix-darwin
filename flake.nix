@@ -10,8 +10,6 @@
   outputs = inputs@{ self, nix-darwin, nixpkgs }:
   let
     configuration = { pkgs, ... }: {
-      system.keyboard.remapCapsLockToControl = true;
-
       environment.systemPackages =
         [
 	    pkgs.git
@@ -37,10 +35,64 @@
 	      "slack" # team communication
 	      "1password" # password manager
 	      "1password-cli" # need to experiment with this!
+	      "arc" # browser
 	  ];
       };
 
-      # Let determinate manage nix
+      system.keyboard = {
+      	enableKeyMapping = true;
+        remapCapsLockToControl = true;
+      };
+
+      system.defaults.menuExtraClock.IsAnalog = true;
+      system.defaults.dock.show-recents = false;
+      system.defaults.dock.mru-spaces = false;
+
+      system.defaults.dock.persistent-apps = [
+        {
+          app = "/Applications/1Password.app";
+        }
+        {
+          app = "/Applications/Arc.app";
+        }
+        {
+          app = "/Applications/Linear.app";
+        }
+        {
+          app = "/Applications/Slack.app";
+        }
+        {
+          spacer = {
+            small = true;
+          };
+        }
+        {
+          folder = "/System/Applications/Utilities";
+        }
+      ];
+
+      system.defaults.finder.AppleShowAllExtensions = true;
+      system.defaults.finder.AppleShowAllFiles = true;
+      system.defaults.finder.FXDefaultSearchScope = "SCcf";
+      system.defaults.finder.NewWindowTarget = "Home";
+
+      system.defaults.NSGlobalDomain.AppleEnableSwipeNavigateWithScrolls = false;
+
+      system.defaults.NSGlobalDomain.NSAutomaticSpellingCorrectionEnabled = false;
+      system.defaults.NSGlobalDomain.NSAutomaticInlinePredictionEnabled = false;
+
+      # TODO identify appropriate values
+      # system.defaults.NSGlobalDomain.InitialKeyRepeat = 
+      # system.defaults.NSGlobalDomain.KeyRepeat = 
+
+      system.defaults.NSGlobalDomain.AppleICUForce24HourTime = true;
+
+      # Turns the function keys back into normal function keys when true
+      # Interesting idea.
+      # system.defaults.NSGlobalDomain."com.apple.keyboard.fnState"
+
+
+      # Let determinate manage nix, not nix-darwin
       nix.enable = false;
 
       # Enable alternative shell support in nix-darwin.
@@ -66,6 +118,9 @@
 
       # Create /etc/zshrc that loads the nix-darwin environment.
       programs.zsh.enable = true;
+
+      # Enables use of touchid for sudo
+      security.pam.services.sudo_local.touchIdAuth = true;
     };
   in
   {
