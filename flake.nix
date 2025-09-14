@@ -41,6 +41,7 @@
 	      "slack" # team communication
 	      "1password" # password manager
 	      "arc" # browser
+        "iterm2" # terminal
 	  ];
       };
 
@@ -64,15 +65,15 @@
           app = "/Applications/Linear.app";
         }
         {
+          app = "/Applications/iTerm.app";
+        }
+        {
           app = "/Applications/Slack.app";
         }
         {
           spacer = {
             small = true;
           };
-        }
-        {
-          folder = "/System/Applications/Utilities";
         }
       ];
 
@@ -162,21 +163,83 @@
         # Let Home Manager install and manage itself.
         programs.home-manager.enable = true;
 
-        programs.git.enable = true;
+	programs.git = {
+            enable = true;
+            userName = "Rupert Deese";
+            userEmail = "github@rh.deese.org";
+            ignores = [ ".DS_Store" ];
+            extraConfig = {
+                init.defaultBranch = "main";
+                push.autoSetupRemote = true;
+		format.pretty = "%Cred%h %Cblue%ad %<(20)%Cgreen%cn %Creset%s";
+		log.abbrevCommit = true;
+		log.date = "format:%F $R";
+		status.short = true;
+		pull.ff = "only";
+            };
+	    aliases = {
+              s = "status -s";
+              l = "log --graph";
+              co = "checkout";
+              cm = "commit -m";
+              d = "diff";
+              ds = "diff --staged";
+              tackon = "commit --amend --no-edit";
+              p = "push";
+              puo = "push -u origin";
+	    };
+        };
+
         programs.neovim = {
           enable = true;
           defaultEditor = true;
           viAlias = true;
           vimAlias = true;
           vimdiffAlias = true;
-#          plugins = with pkgs.vimPlugins; [
-#            nvim-lspconfig
-#            nvim-treesitter.withAllGrammars
+          plugins = with pkgs.vimPlugins; [
+	     vim-solarized8
+	     vim-fugitive
+	     vim-rhubarb
+	     vim-eunuch
+	     vim-repeat
+	     vim-surround
+	     vim-windowswap
+	     vim-grepper
+	     QFEnter
+	     ale
+	     fastfold
+	     fzf-lua
+	     rest-nvim
+	     aider-nvim
+       nvim-lspconfig
+       nvim-treesitter.withAllGrammars
 #            plenary-nvim
-#            gruvbox-material
 #            mini-nvim
-#          ];
+          ];
+	  extraConfig = ''
+              " Turn off mouse
+              set mouse=
+              
+              " use two spaces for indents, and make them actual spaces
+              set shiftwidth=2
+              set tabstop=2
+              set autoindent
+              set expandtab
+              
+              set number
+              syntax enable
+              set background=light
+              colorscheme solarized8
+              set nobackup
+              filetype indent on
+              filetype plugin on
+              set noincsearch
+	  '';
         };
+
+	programs.tmux = {
+	    enable = true;
+	};
 
 	imports = [ inputs._1password-shell-plugins.hmModules.default ];
         programs._1password-shell-plugins = {
@@ -192,6 +255,9 @@
           initContent = ''
             eval "$(/opt/homebrew/bin/brew shellenv)"
           '';
+	  shellAliases = {
+	      tmns = "tmux new-s -d -s";
+	  };
         };
     };
   in
