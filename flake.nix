@@ -4,6 +4,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
+    nix-ai-tools.url = "github:numtide/nix-ai-tools";
+    claude-code.url = "github:sadjow/claude-code-nix";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -13,7 +15,7 @@
     _1password-shell-plugins.url = "github:1Password/shell-plugins";
   };
 
-  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, ... }:
+  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, nix-ai-tools, claude-code, ... }:
     let
     configuration = { pkgs, ... }: {
       environment.systemPackages =
@@ -24,8 +26,15 @@
           pkgs.htop
           pkgs.tmux
           pkgs.ripgrep
-          pkgs.gh
-        ];
+          pkgs.fzf # fuzzy finder
+          pkgs.gh # github
+          pkgs.kanata # keyboard remapper
+          claude-code.packages.${pkgs.system}.claude-code # claude CLI AI
+          pkgs.devenv # managing repo-specific nix configs
+          pkgs.flyctl # for manipulating GF infrastructure
+        ] ++ (with nix-ai-tools.packages.${pkgs.system}; [
+          coderabbit-cli
+        ]);
 
       homebrew = {
         enable = true;
@@ -42,6 +51,12 @@
             "1password" # password manager
             "arc" # browser
             "iterm2" # terminal
+            "karabiner-elements" # keyboard remapper, dependency of system package kanata
+            "zoom" # video conferencing... sigh
+            "selfcontrol" # site blocking
+            "dbeaver-community" # database client
+            "loom" # screen recording
+            "nordvpn"
         ];
       };
 
@@ -93,6 +108,10 @@
 
       system.defaults.NSGlobalDomain.AppleICUForce24HourTime = true;
 
+      system.defaults.WindowManager.EnableStandardClickToShowDesktop = false;
+
+      system.defaults.dock.autohide = true;
+
       # Turns the function keys back into normal function keys when true
       # Interesting idea.
       # system.defaults.NSGlobalDomain."com.apple.keyboard.fnState"
@@ -106,6 +125,8 @@
 
       # Let determinate manage nix, not nix-darwin
       nix.enable = false;
+
+      nix.settings.trusted-users = ["root" "rupertdeese"];
 
       # Enable alternative shell support in nix-darwin.
       # programs.fish.enable = true;
@@ -133,6 +154,9 @@
 
       # Create /etc/zshrc that loads the nix-darwin environment.
       programs.zsh.enable = true;
+
+      # autoruns .envrc on directory entry. primarily for use with devenv
+      programs.direnv.enable = true;
 
       # Enables use of touchid for sudo
       security.pam.services.sudo_local.touchIdAuth = true;
@@ -216,77 +240,8 @@
 #            plenary-nvim
 #            mini-nvim
       ];
-      extraConfig = ''
-        " Turn off mouse
-        set mouse=
-
-        " use two spaces for indents, and make them actual spaces
-        set shiftwidth=2
-        set tabstop=2
-        set autoindent
-        set expandtab
-
-        set number
-        syntax enable
-        set background=light
-        colorscheme solarized8
-        set nobackup
-        filetype indent on
-        filetype plugin on
-        set noincsearch
-
-        " try out syntax folding by default
-        let php_folding=2
-        set foldminlines=5
-        autocmd Syntax * setlocal foldmethod=syntax
-        autocmd Syntax * normal zR
-
-        " Set <Leader> key
-        let mapleader=','
-        
-        " reduce length of timeout waiting for rest of command
-        set timeoutlen=300 " ms
-        
-        " Keep space around the cursor when scrolling
-        set scrolloff=8
-        
-        " To encourage macro usage
-        nnoremap <Space> @q
-        
-        " Shortcut for deleting into the null register ("_), to preserve clipboard
-        " contents
-        nnoremap -d "_d
-        
-        " change split opening to bottom and right instead of top and left
-        set splitbelow
-        set splitright
-
-        " remap windowswap to a ctrl-w command
-        let g:windowswap_map_keys = 0 "prevent default bindings
-        nnoremap <silent> <C-W>y :call WindowSwap#EasyWindowSwap()<CR>
-
-        " TODO: add back fzf stuff (using fzf-lua)
-
-        " Grepper
-
-        " Use rg over grep
-        if executable('rg')
-          set grepprg=rg\ --nogroup\ --nocolor
-        endif
-
-        " Use Grepper to search for the word under the cursor using rg
-        " (replaces backwards identifier search)
-        nnoremap # :Grepper -cword -noprompt<CR>
-
-        " Use \ as a shortcut for :Grepper
-        nnoremap \ :Grepper<CR>
-
-        nmap gw <plug>(GrepperOperator)
-        xmap gw <plug>(GrepperOperator)
-
-        " let g:grepper.tools =
-        "   \ ['rg', 'git', 'ack']
-      '';
+      extraConfig = builtins.readFile ./nvim-vimrc.vim;
+      extraLuaConfig = builtins.readFile ./nvim-config.lua;
     };
 
     programs.tmux = {
@@ -327,6 +282,9 @@
 
         # Monitor activity in all windows
         setw -g monitor-activity on
+
+        # Enable mouse support (scrolling, selecting, copying)
+        set -g mouse on
 
         # Status bar
         set -g status-left " #S "
@@ -406,46 +364,7 @@
         history = "history 1";
       };
 
-      initExtra = ''
-        # Keymap
-        bindkey -e
-
-        # History
-        HISTFILE="$HOME/.zsh_history"
-        HISTSIZE=100000
-        SAVEHIST=$HISTSIZE
-        setopt INC_APPEND_HISTORY
-        setopt HIST_IGNORE_DUPS
-        setopt HIST_REDUCE_BLANKS
-        setopt HIST_VERIFY
-
-        # Kill autocorrect
-        unsetopt CORRECT CORRECT_ALL
-
-        __pretty_line() {
-          # Needs 'bc' and 'tput' (ensure pkgs.bc is installed below)
-          local OFFSET END LINE STUFF C
-          OFFSET=$(bc <<< "16 + ($RANDOM % 36 + 1)*6")
-          END=$(bc <<< "$OFFSET + 5")
-          LINE=""
-          for C in $(seq $OFFSET $END); do
-            STUFF=$(printf ' %.0s' $(seq 1 $(bc <<< "$(tput cols)/12")))
-            LINE+="\033[48;5;''${C}m''${STUFF}"
-          done
-          for C in $(seq $END $OFFSET); do
-            STUFF=$(printf ' %.0s' $(seq 1 $(bc <<< "$(tput cols)/12")))
-            LINE+="\033[48;5;''${C}m''${STUFF}"
-          done
-          LINE+=$(printf ' %.0s' $(seq 1 $(bc <<< "$(tput cols) - 12*($(tput cols)/12)")))
-          echo -e "$LINE"
-          tput sgr0
-        }
-
-        __clear_with_line () { clear; __pretty_line; zle redisplay }
-
-        zle -N __clear_with_line
-        bindkey '^L' __clear_with_line
-      '';
+      initExtra = builtins.readFile ./zsh-extra.sh;
     };
 
     programs.ssh = {
@@ -454,6 +373,7 @@
         Host *
         AddKeysToAgent yes
         UseKeychain yes
+
         IdentityFile ~/.ssh/id_ed25519
         '';
     };
