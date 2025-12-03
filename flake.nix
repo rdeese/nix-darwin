@@ -56,7 +56,8 @@
             "selfcontrol" # site blocking
             "dbeaver-community" # database client
             "loom" # screen recording
-            "nordvpn"
+            "nordvpn" # vpn
+            "railway" # app deploys
         ];
       };
 
@@ -229,12 +230,11 @@
         vim-surround
         vim-windowswap
         vim-grepper
-        QFEnter
+        nvim-bqf
         ale
         fastfold
         fzf-lua
         rest-nvim
-        aider-nvim
         nvim-lspconfig
         nvim-treesitter.withAllGrammars
 #            plenary-nvim

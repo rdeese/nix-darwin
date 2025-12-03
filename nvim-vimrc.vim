@@ -42,6 +42,9 @@ nnoremap -d "_d
 set splitbelow
 set splitright
 
+" Clear search highlighting with Esc in normal mode
+nnoremap <silent> <Esc> :nohlsearch<CR>
+
 " remap windowswap to a ctrl-w command
 let g:windowswap_map_keys = 0 "prevent default bindings
 nnoremap <silent> <C-W>y :call WindowSwap#EasyWindowSwap()<CR>

@@ -15,57 +15,58 @@ unsetopt CORRECT CORRECT_ALL
 
 # Git-aware prompt
 __git_branch_and_status () {
-  # Get the status of the repo and color the branch name appropriately
   local STATUS=$(git status --long 2>&1)
   local BRANCH=$(git branch 2>/dev/null | grep '^*' | colrm 1 2)
+  local DIR_NAME="${PWD##*/}"
+  local DEFAULT="%b%f"
   local GREEN="%b%F{green}"
   local RED="%b%F{red}"
   local YELLOW="%b%F{yellow}"
-  if [[ "$STATUS" != *'not a git repository'* ]]
-  then
-    PS1+="$DEFAULT:"
-    if [[ "$STATUS" != *'working tree clean'* ]]
-    then
-      if [[ "$STATUS" == *'Changes to be committed'* ]]
-      then
-        # green if all changes are staged
-        PS1+="$GREEN"
-      fi
-      if [[ "$STATUS" == *'Changes not staged for commit'* ]] || [[ "$STATUS" == *'Unmerged paths'* ]]
-      then
-        # red if there are unstaged changes
-        PS1+="$RED"
-      fi
-    else
-      if [[ "$STATUS" == *'Your branch is ahead'* ]]
-      then
-        # yellow if need to push
-        PS1+="$YELLOW"
-      else
-        # else default
-        PS1+="$DEFAULT"
-      fi
-    fi
+  local LAVENDER="%B%F{magenta}"
 
-    PS1+="$BRANCH"
+  if [[ "$STATUS" == *'not a git repository'* ]]; then
+    # Not in a git repo - just show directory in lavender
+    PS1+="$LAVENDER%1d"
+    return
+  fi
 
-    if [[ "$STATUS" == *'Untracked files'* ]]
-    then
-      # red question mark to indicate untracked files
-      PS1+="$RED"
-      PS1+="?"
+  # Determine git status color
+  local GIT_COLOR="$DEFAULT"
+  if [[ "$STATUS" != *'working tree clean'* ]]; then
+    if [[ "$STATUS" == *'Changes to be committed'* ]]; then
+      GIT_COLOR="$GREEN"
     fi
+    if [[ "$STATUS" == *'Changes not staged for commit'* ]] || [[ "$STATUS" == *'Unmerged paths'* ]]; then
+      GIT_COLOR="$RED"
+    fi
+  else
+    if [[ "$STATUS" == *'Your branch is ahead'* ]]; then
+      GIT_COLOR="$YELLOW"
+    fi
+  fi
+
+  # Show consolidated or separate format
+  if [[ "$BRANCH" == "$DIR_NAME" ]]; then
+    # Branch matches directory - show once with git color
+    PS1+="$GIT_COLOR%1d"
+  else
+    # Branch differs - show directory:branch
+    PS1+="$LAVENDER%1d$DEFAULT:$GIT_COLOR$BRANCH"
+  fi
+
+  # Add untracked files indicator
+  if [[ "$STATUS" == *'Untracked files'* ]]; then
+    PS1+="$RED?"
   fi
 }
 
 __prompt_command() {
   local LAST_COMMAND_SUCCESS=$[$? == 0]
   local DEFAULT="%b%f"
-  local JADE="%F{36}"
-  local LAVENDER="%B%F{magenta}"
-  # Show current directory in lavender
-  PS1="$LAVENDER%1d"
+
+  PS1=""
   __git_branch_and_status
+
   if [ $LAST_COMMAND_SUCCESS = 1 ]; then
     PS1+="%b%F{green}"
   else

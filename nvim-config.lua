@@ -1,3 +1,10 @@
+-- treesitter configuration
+require('nvim-treesitter.configs').setup({
+  highlight = {
+    enable = true,
+  },
+})
+
 -- fzf-lua configuration
 require('fzf-lua').setup({
   winopts = {
@@ -24,7 +31,7 @@ require('fzf-lua').setup({
 
 -- Keybindings
 vim.keymap.set('n', '<C-p>', require('fzf-lua').files, { desc = 'Find files' })
-vim.keymap.set('n', '<C-g>', require('fzf-lua').live_grep, { desc = 'Live grep' })
+vim.keymap.set('n', '<Leader>fg', require('fzf-lua').live_grep, { desc = 'Live grep' })
 vim.keymap.set('n', '<Leader>fb', require('fzf-lua').buffers, { desc = 'Find buffers' })
 vim.keymap.set('n', '<Leader>fh', require('fzf-lua').oldfiles, { desc = 'Find history' })
 
