@@ -30,10 +30,10 @@
           pkgs.fzf # fuzzy finder
           pkgs.gh # github
           pkgs.kanata # keyboard remapper
-          claude-code.packages.${pkgs.system}.claude-code # claude CLI AI
+          claude-code.packages.${pkgs.stdenv.hostPlatform.system}.claude-code # claude CLI AI
           pkgs.devenv # managing repo-specific nix configs
           pkgs.flyctl # for manipulating GF infrastructure
-        ] ++ (with nix-ai-tools.packages.${pkgs.system}; [
+        ] ++ (with nix-ai-tools.packages.${pkgs.stdenv.hostPlatform.system}; [
           coderabbit-cli
         ]);
 
@@ -196,10 +196,12 @@
 
     programs.git = {
       enable = true;
-      userName = "Rupert Deese";
-      userEmail = "github@rh.deese.org";
       ignores = [ ".DS_Store" ];
-      extraConfig = {
+      settings = {
+        user = {
+          name = "Rupert Deese";
+          email = "github@rh.deese.org";
+        };
         init.defaultBranch = "main";
         push.autoSetupRemote = true;
         format.pretty = "%Cred%h %Cblue%ad %<(20)%Cgreen%cn %Creset%s";
@@ -207,17 +209,17 @@
         log.date = "format:%F $R";
         status.short = true;
         pull.ff = "only";
-      };
-      aliases = {
-        s = "status -s";
-        l = "log --graph";
-        co = "checkout";
-        cm = "commit -m";
-        d = "diff";
-        ds = "diff --staged";
-        tackon = "commit --amend --no-edit";
-        p = "push";
-        puo = "push -u origin";
+        alias = {
+          s = "status -s";
+          l = "log --graph";
+          co = "checkout";
+          cm = "commit -m";
+          d = "diff";
+          ds = "diff --staged";
+          tackon = "commit --amend --no-edit";
+          p = "push";
+          puo = "push -u origin";
+        };
       };
     };
 
@@ -377,13 +379,14 @@
 
     programs.ssh = {
       enable = true;
-      extraConfig = ''
-        Host *
-        AddKeysToAgent yes
-        UseKeychain yes
-
-        IdentityFile ~/.ssh/id_ed25519
-        '';
+      enableDefaultConfig = false;
+      matchBlocks."*" = {
+        identityFile = "~/.ssh/id_ed25519";
+        addKeysToAgent = "yes";
+        extraOptions = {
+          UseKeychain = "yes";
+        };
+      };
     };
   };
   in
