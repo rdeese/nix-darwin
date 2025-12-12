@@ -40,9 +40,13 @@
         enable = true;
 
         onActivation.cleanup = "uninstall";
+        onActivation.upgrade = true;
 
         taps = [];
-        brews = [];
+        brews = [
+            "railway" # app deploys cli
+            "stripe-cli"
+        ];
         casks = [
             "maccy" # clipboard history
             "rectangle" # window management
@@ -57,7 +61,6 @@
             "dbeaver-community" # database client
             "loom" # screen recording
             "nordvpn" # vpn
-            "railway" # app deploys
         ];
       };
 
@@ -322,7 +325,10 @@
       enable = true;
       # the specified packages as well as 1Password CLI will be
       # automatically installed and configured to use shell plugins
-      plugins = with pkgs; [ gh awscli2 ];
+      plugins = with pkgs; [
+        # gh
+        awscli2
+      ];
     };
 
     programs.starship = {
