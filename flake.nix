@@ -6,6 +6,7 @@
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-ai-tools.url = "github:numtide/nix-ai-tools";
     claude-code.url = "github:sadjow/claude-code-nix";
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -15,7 +16,7 @@
     _1password-shell-plugins.url = "github:1Password/shell-plugins";
   };
 
-  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, nix-ai-tools, claude-code, ... }:
+  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, nix-ai-tools, claude-code, determinate, ... }:
     let
     configuration = { pkgs, ... }: {
       environment.systemPackages =
@@ -130,7 +131,10 @@
       # Let determinate manage nix, not nix-darwin
       nix.enable = false;
 
-      nix.settings.trusted-users = ["root" "rupertdeese"];
+      # Custom nix settings written to /etc/nix/nix.custom.conf
+      determinate-nix.customSettings = {
+        trusted-users = "root rupertdeese";
+      };
 
       # Enable alternative shell support in nix-darwin.
       # programs.fish.enable = true;
@@ -174,8 +178,7 @@
     ];
 
     home.sessionVariables = {
-      # convince tmux to use vim bindings
-      VISUAL = "vim";
+      # VISUAL is set by programs.neovim.defaultEditor = true
     };
 
     # This value determines the Home Manager release that your
@@ -389,6 +392,7 @@
     # $ darwin-rebuild build --flake .#Ruperts-MacBook-Pro
     darwinConfigurations."Ruperts-MacBook-Pro" = nix-darwin.lib.darwinSystem {
       modules = [
+        determinate.darwinModules.default
         configuration
           home-manager.darwinModules.home-manager  {
             home-manager.useGlobalPkgs = true;
