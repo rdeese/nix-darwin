@@ -12,8 +12,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # loads 1password-cli and shell plugins
-    _1password-shell-plugins.url = "github:1Password/shell-plugins";
   };
 
   outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, nix-ai-tools, claude-code, determinate, ... }:
@@ -47,6 +45,7 @@
         brews = [
             "railway" # app deploys cli
             "stripe-cli"
+            "cloudflare-wrangler"
         ];
         casks = [
             "maccy" # clipboard history
@@ -321,18 +320,6 @@
       # Plugins (no TPM needed — HM wires them up)
       plugins = with pkgs; [
         tmuxPlugins.resurrect
-      ];
-    };
-
-    imports = [ inputs._1password-shell-plugins.hmModules.default ];
-    programs._1password-shell-plugins = {
-      # enable 1Password shell plugins for bash, zsh, and fish shell
-      enable = true;
-      # the specified packages as well as 1Password CLI will be
-      # automatically installed and configured to use shell plugins
-      plugins = with pkgs; [
-        # gh
-        awscli2
       ];
     };
 
