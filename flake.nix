@@ -45,7 +45,6 @@
             pkgs.kanata
             claude-code.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
             pkgs.devenv
-            pkgs.flyctl
           ] ++ (with nix-ai-tools.packages.${pkgs.stdenv.hostPlatform.system}; [
             coderabbit-cli
           ]);
@@ -55,25 +54,15 @@
           onActivation.cleanup = "uninstall";
           onActivation.upgrade = true;
           taps = [];
-          brews = [
-            "railway"
-            "stripe-cli"
-            "cloudflare-wrangler"
-          ];
+          brews = [];
+          # Base casks - utilities for all machines
           casks = [
             "maccy"
             "rectangle"
-            "linear-linear"
-            "slack"
             "1password"
             "arc"
             "iterm2"
             "karabiner-elements"
-            "zoom"
-            "selfcontrol"
-            "dbeaver-community"
-            "loom"
-            "nordvpn"
           ];
         };
 
@@ -86,15 +75,6 @@
         system.defaults.dock.show-recents = false;
         system.defaults.dock.mru-spaces = false;
         system.defaults.dock.autohide = true;
-
-        system.defaults.dock.persistent-apps = [
-          { app = "/Applications/1Password.app"; }
-          { app = "/Applications/Arc.app"; }
-          { app = "/Applications/Linear.app"; }
-          { app = "/Applications/iTerm.app"; }
-          { app = "/Applications/Slack.app"; }
-          { spacer = { small = true; }; }
-        ];
 
         system.defaults.finder.AppleShowAllExtensions = true;
         system.defaults.finder.AppleShowAllFiles = true;
@@ -134,6 +114,39 @@
         # Set hostname for network identification
         networking.hostName = machine.hostname;
         networking.localHostName = machine.hostname;
+      };
+
+      # Workstation-specific apps (Linear, Slack, dev tools, etc.)
+      workstationApps = { pkgs, ... }: {
+        environment.systemPackages = [
+          pkgs.flyctl
+        ];
+
+        homebrew.brews = [
+          "railway"
+          "stripe-cli"
+          "cloudflare-wrangler"
+        ];
+
+        homebrew.casks = [
+          "linear-linear"
+          "slack"
+          "zoom"
+          "selfcontrol"
+          "dbeaver-community"
+          "loom"
+          "nordvpn"
+        ];
+
+        # Dock apps make sense for workstations
+        system.defaults.dock.persistent-apps = [
+          { app = "/Applications/1Password.app"; }
+          { app = "/Applications/Arc.app"; }
+          { app = "/Applications/Linear.app"; }
+          { app = "/Applications/iTerm.app"; }
+          { app = "/Applications/Slack.app"; }
+          { spacer = { small = true; }; }
+        ];
       };
 
       # Homebase-specific configuration (services, sleep prevention)
@@ -368,6 +381,7 @@
       # Build with: darwin-rebuild switch --flake .#rupert-mbp
       darwinConfigurations."rupert-mbp" = mkDarwinSystem {
         machine = machines.workstation;
+        extraModules = [ workstationApps ];
       };
 
       # Homebase: server machine running smart home services
@@ -377,6 +391,17 @@
         extraModules = [
           (homebaseConfiguration { machine = machines.homebase; })
         ];
+      };
+
+      # Minimal: base config for other machines
+      # Copy this and customize the machine entry for new machines
+      # Build with: darwin-rebuild switch --flake .#minimal
+      darwinConfigurations."minimal" = mkDarwinSystem {
+        machine = {
+          hostname = "mac";
+          username = "user";
+          home = "/Users/user";
+        };
       };
 
       # Keep the old name as an alias for backwards compatibility
