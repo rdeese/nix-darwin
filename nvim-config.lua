@@ -1,8 +1,12 @@
--- treesitter configuration
-require('nvim-treesitter.configs').setup({
-  highlight = {
-    enable = true,
-  },
+-- Enable treesitter highlighting for all filetypes with available parsers
+vim.api.nvim_create_autocmd('FileType', {
+  callback = function(args)
+    local ok = pcall(vim.treesitter.start, args.buf)
+    if ok then
+      -- Disable legacy syntax highlighting when treesitter is active
+      vim.bo[args.buf].syntax = ''
+    end
+  end,
 })
 
 -- fzf-lua configuration

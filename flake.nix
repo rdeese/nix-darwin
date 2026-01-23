@@ -61,6 +61,13 @@
             "dbeaver-community" # database client
             "loom" # screen recording
             "nordvpn" # vpn
+            "claude" # AI assistant desktop app
+            "fathom" # analytics
+            "microsoft-excel" # spreadsheets
+            "raspberry-pi-imager" # SD card imaging
+            "tailscale-app" # mesh VPN
+            "typora" # markdown editor
+            # Willow Voice - download manually from willowvoice.com/download (no homebrew cask)
         ];
       };
 
@@ -106,15 +113,30 @@
       system.defaults.NSGlobalDomain.NSAutomaticSpellingCorrectionEnabled = false;
       system.defaults.NSGlobalDomain.NSAutomaticInlinePredictionEnabled = false;
 
-      # TODO identify appropriate values
-      # system.defaults.NSGlobalDomain.InitialKeyRepeat = 
-      # system.defaults.NSGlobalDomain.KeyRepeat = 
+      system.defaults.NSGlobalDomain.InitialKeyRepeat = 15; # default 25, lower = faster
+      system.defaults.NSGlobalDomain.KeyRepeat = 2; # default 6, lower = faster 
 
       system.defaults.NSGlobalDomain.AppleICUForce24HourTime = true;
 
       system.defaults.WindowManager.EnableStandardClickToShowDesktop = false;
 
       system.defaults.dock.autohide = true;
+
+      # Trackpad settings
+      system.defaults.trackpad.Clicking = false; # no tap to click
+      system.defaults.trackpad.TrackpadRightClick = true; # two-finger tap for right-click
+      system.defaults.trackpad.TrackpadThreeFingerDrag = true; # three-finger drag
+
+      # Screenshot settings
+      system.defaults.screencapture.location = "~/Desktop";
+      system.defaults.screencapture.type = "png";
+      system.defaults.screencapture.disable-shadow = true;
+
+      # Disable more auto-corrections
+      system.defaults.NSGlobalDomain.NSAutomaticCapitalizationEnabled = false;
+      system.defaults.NSGlobalDomain.NSAutomaticDashSubstitutionEnabled = false;
+      system.defaults.NSGlobalDomain.NSAutomaticPeriodSubstitutionEnabled = false;
+      system.defaults.NSGlobalDomain.NSAutomaticQuoteSubstitutionEnabled = false;
 
       # Turns the function keys back into normal function keys when true
       # Interesting idea.
@@ -130,9 +152,25 @@
       # Let determinate manage nix, not nix-darwin
       nix.enable = false;
 
+      # Kanata keyboard remapper service (kenkyo layout)
+      # Upstream: https://github.com/argenkiwi/kenkyo
+      # Requires Karabiner-Elements for input access on macOS
+      # Grant Accessibility permissions to kanata in System Settings > Privacy & Security
+      launchd.user.agents.kanata = let
+        kanataConfig = pkgs.writeText "kanata.kbd" (builtins.readFile ./kanata.kbd);
+      in {
+        command = "${pkgs.kanata}/bin/kanata -c ${kanataConfig}";
+        serviceConfig = {
+          KeepAlive = true;
+          RunAtLoad = true;
+          StandardOutPath = "/tmp/kanata.out.log";
+          StandardErrorPath = "/tmp/kanata.err.log";
+        };
+      };
+
       # Custom nix settings written to /etc/nix/nix.custom.conf
-      determinate-nix.customSettings = {
-        trusted-users = "root rupertdeese";
+      determinateNix.customSettings = {
+        trusted-users = ["root" "rupertdeese"];
       };
 
       # Enable alternative shell support in nix-darwin.
@@ -242,10 +280,16 @@
         fastfold
         fzf-lua
         rest-nvim
+        fidget-nvim
+        nvim-nio
         nvim-lspconfig
         nvim-treesitter.withAllGrammars
 #            plenary-nvim
 #            mini-nvim
+      ];
+      extraLuaPackages = ps: with ps; [
+        mimetypes
+        xml2lua
       ];
       extraConfig = builtins.readFile ./nvim-vimrc.vim;
       extraLuaConfig = builtins.readFile ./nvim-config.lua;
