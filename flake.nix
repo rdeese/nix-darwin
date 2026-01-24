@@ -393,17 +393,6 @@
         ];
       };
 
-      # Minimal: base config for other machines
-      # Copy this and customize the machine entry for new machines
-      # Build with: darwin-rebuild switch --flake .#minimal
-      darwinConfigurations."minimal" = mkDarwinSystem {
-        machine = {
-          hostname = "mac";
-          username = "user";
-          home = "/Users/user";
-        };
-      };
-
       # Keep the old name as an alias for backwards compatibility
       darwinConfigurations."Ruperts-MacBook-Pro" =
         self.darwinConfigurations."rupert-mbp";
