@@ -152,22 +152,6 @@
       # Let determinate manage nix, not nix-darwin
       nix.enable = false;
 
-      # Kanata keyboard remapper service (kenkyo layout)
-      # Upstream: https://github.com/argenkiwi/kenkyo
-      # Requires Karabiner-Elements for input access on macOS
-      # Grant Accessibility permissions to kanata in System Settings > Privacy & Security
-      launchd.user.agents.kanata = let
-        kanataConfig = pkgs.writeText "kanata.kbd" (builtins.readFile ./kanata.kbd);
-      in {
-        command = "${pkgs.kanata}/bin/kanata -c ${kanataConfig}";
-        serviceConfig = {
-          KeepAlive = true;
-          RunAtLoad = true;
-          StandardOutPath = "/tmp/kanata.out.log";
-          StandardErrorPath = "/tmp/kanata.err.log";
-        };
-      };
-
       # Custom nix settings written to /etc/nix/nix.custom.conf
       determinateNix.customSettings = {
         trusted-users = ["root" "rupertdeese"];
@@ -401,6 +385,7 @@
         tmns = "tmux new-s -d -s";
         router = ''arp -a | grep $(route -n get default | awk '/gateway/{print $2}') | awk '{print $1}' | head -n 1'';
         history = "history 1";
+        rhd-keyboard = "sudo kanata -c ~/.config/nix-darwin/kanata.kbd";
       };
 
       initContent = ''
