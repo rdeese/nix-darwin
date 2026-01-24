@@ -123,6 +123,7 @@
         system.defaults.trackpad.Clicking = false;
         system.defaults.trackpad.TrackpadRightClick = true;
         system.defaults.trackpad.TrackpadThreeFingerDrag = true;
+        system.defaults.NSGlobalDomain."com.apple.trackpad.scaling" = 3.0;
 
         system.defaults.screencapture.location = "~/Desktop";
         system.defaults.screencapture.type = "png";
