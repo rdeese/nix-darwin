@@ -99,14 +99,10 @@ The homebase config includes launchd services that require manual setup.
 cd ~/Documents
 gh repo clone rdeese/light-controls
 cd light-controls/standalone
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
-
-sudo mkdir -p /usr/local/lightctl
-sudo cp -r .venv src static pyproject.toml /usr/local/lightctl/
-sudo chown -R rhd:staff /usr/local/lightctl
+sudo ./scripts/install-service.sh
 ```
+
+Copy config files to `~/.lightctl/` (config.json, lights.json, curves.json, certs, etc.).
 
 ### tiny-iot (port 8000)
 
@@ -114,19 +110,17 @@ sudo chown -R rhd:staff /usr/local/lightctl
 cd ~/Documents
 gh repo clone rdeese/tiny-iot
 cd tiny-iot/server
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env to add API keys
+sudo ./scripts/install-service.sh
 ```
+
+Copy `.env` file to `/usr/local/tinyiot/.env` with API keys.
 
 ### Verify Services
 
 ```bash
 sudo launchctl list | grep -E 'lightctl|tinyiot'
 tail -f /usr/local/lightctl/lightctl.out
-tail -f /tmp/tinyiot.log
+tail -f /usr/local/tinyiot/tinyiot.log
 ```
 
 ## Troubleshooting

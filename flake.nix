@@ -46,6 +46,7 @@
             pkgs.flyctl
             claude-code.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
             pkgs.devenv
+            pkgs.uv
           ] ++ (with nix-ai-tools.packages.${pkgs.stdenv.hostPlatform.system}; [
             coderabbit-cli
           ]);
@@ -79,7 +80,9 @@
             "microsoft-excel"
             "raspberry-pi-imager"
             "tailscale-app"
+            "transmission"
             "typora"
+            "vlc"
           ];
         };
 
@@ -195,54 +198,54 @@
         power.sleep.harddisk = "never";
 
         # Light controls service (HTTPS on port 443)
-        launchd.daemons.lightctl = {
-          serviceConfig = {
-            Label = "com.lightctl";
-            ProgramArguments = [
-              "/usr/local/lightctl/.venv/bin/lightctl"
-              "serve"
-              "--host" "0.0.0.0"
-              "--port" "443"
-            ];
-            WorkingDirectory = "/usr/local/lightctl";
-            UserName = machine.username;
-            GroupName = "staff";
-            RunAtLoad = true;
-            KeepAlive = true;
-            StandardErrorPath = "/usr/local/lightctl/lightctl.err";
-            StandardOutPath = "/usr/local/lightctl/lightctl.out";
-            EnvironmentVariables = {
-              HOME = machine.home;
-            };
-          };
-        };
+        # TODO: Re-enable once lightctl is packaged with devenv/nix
+        # launchd.daemons.lightctl = {
+        #   serviceConfig = {
+        #     Label = "com.lightctl";
+        #     ProgramArguments = [
+        #       "/usr/local/lightctl/.venv/bin/lightctl"
+        #       "serve"
+        #       "--host" "0.0.0.0"
+        #       "--port" "443"
+        #     ];
+        #     WorkingDirectory = "/usr/local/lightctl";
+        #     UserName = machine.username;
+        #     GroupName = "staff";
+        #     RunAtLoad = true;
+        #     KeepAlive = true;
+        #     StandardErrorPath = "/usr/local/lightctl/lightctl.err";
+        #     StandardOutPath = "/usr/local/lightctl/lightctl.out";
+        #     EnvironmentVariables = {
+        #       HOME = machine.home;
+        #     };
+        #   };
+        # };
 
         # Tiny IoT service (HTTP on port 8000)
-        launchd.daemons.tinyiot = {
-          serviceConfig = {
-            Label = "com.tinyiot.server";
-            ProgramArguments = [
-              "/bin/bash"
-              "-c"
-              "cd ${machine.home}/Documents/tiny-iot/server && source venv/bin/activate && exec caffeinate -s python main.py"
-            ];
-            WorkingDirectory = "${machine.home}/Documents/tiny-iot/server";
-            UserName = machine.username;
-            GroupName = "staff";
-            RunAtLoad = true;
-            KeepAlive = {
-              SuccessfulExit = false;
-            };
-            ThrottleInterval = 5;
-            StandardOutPath = "/tmp/tinyiot.log";
-            StandardErrorPath = "/tmp/tinyiot.err";
-            EnvironmentVariables = {
-              PATH = "/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin";
-              TINYIOT_HOME = "${machine.home}/Documents/tiny-iot";
-              HOME = machine.home;
-            };
-          };
-        };
+        # TODO: Re-enable once tinyiot is working properly
+        # launchd.daemons.tinyiot = {
+        #   serviceConfig = {
+        #     Label = "com.tinyiot.server";
+        #     ProgramArguments = [
+        #       "/usr/local/tinyiot/venv/bin/python"
+        #       "/usr/local/tinyiot/main.py"
+        #     ];
+        #     WorkingDirectory = "/usr/local/tinyiot";
+        #     UserName = machine.username;
+        #     GroupName = "staff";
+        #     RunAtLoad = true;
+        #     KeepAlive = {
+        #       SuccessfulExit = false;
+        #     };
+        #     ThrottleInterval = 5;
+        #     StandardOutPath = "/usr/local/tinyiot/tinyiot.log";
+        #     StandardErrorPath = "/usr/local/tinyiot/tinyiot.err";
+        #     EnvironmentVariables = {
+        #       PATH = "/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin";
+        #       HOME = machine.home;
+        #     };
+        #   };
+        # };
       };
 
       # Shared home-manager configuration
