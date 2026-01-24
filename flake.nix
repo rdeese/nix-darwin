@@ -185,6 +185,7 @@
 
         networking.hostName = machine.hostname;
         networking.localHostName = machine.hostname;
+        networking.computerName = machine.hostname;
       };
 
       # Homebase-specific configuration (services, sleep prevention)
