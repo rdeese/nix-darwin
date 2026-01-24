@@ -30,43 +30,64 @@ Restart Terminal after installation.
 eval "$(/opt/homebrew/bin/brew shellenv)"
 ```
 
-### 4. Install 1Password and Get Credentials
+### 4. Download and Apply Configuration
 
-```bash
-brew install --cask 1password
-```
-
-Open 1Password, sign in, and retrieve your GitHub credentials.
-
-### 5. Authenticate with GitHub
-
-```bash
-nix run nixpkgs#gh -- auth login
-```
-
-### 6. Clone This Repo
+Log into GitHub via Safari (use credentials from another device/password manager), then download this repo as a zip from GitHub and extract it:
 
 ```bash
 mkdir -p ~/Documents
-nix run nixpkgs#gh -- repo clone rdeese/nix-darwin ~/Documents/nix-darwin
-cd ~/Documents/nix-darwin
+cd ~/Documents
+unzip ~/Downloads/nix-darwin-master.zip
+mv nix-darwin-master nix-darwin
+cd nix-darwin
 ```
 
-### 7. Apply Configuration
-
-First time (bootstraps nix-darwin):
+Apply the configuration (first time bootstraps nix-darwin):
 
 ```bash
 nix run nix-darwin -- switch --flake .#<config-name>
 ```
 
-Future updates:
+Replace `<config-name>` with `rupert-mbp` or `homebase`.
+
+### 5. Post-Install Setup
+
+Once nix-darwin finishes, 1Password and other apps are installed.
+
+**Sign into 1Password** to access your credentials.
+
+**Set up GitHub CLI with SSH key:**
 
 ```bash
-darwin-rebuild switch --flake .#<config-name>
+gh auth login
 ```
 
-Replace `<config-name>` with `rupert-mbp` or `homebase`.
+Select SSH and let it generate a key with a passphrase. Then add the passphrase to your keychain:
+
+```bash
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+```
+
+**Enable login items** for Maccy (Preferences → Launch at login). Rectangle manages its own login item via the config.
+
+**Convert the repo to a git clone:**
+
+```bash
+cd ~/Documents/nix-darwin
+git init
+git remote add origin git@github.com:rdeese/nix-darwin.git
+git fetch
+git reset origin/master
+git branch -u origin/master
+```
+
+## Updating
+
+```bash
+cd ~/Documents/nix-darwin
+git pull
+darwin-rebuild switch --flake .#<config-name>
+```
 
 ## Homebase Server Setup
 
@@ -108,18 +129,12 @@ tail -f /usr/local/lightctl/lightctl.out
 tail -f /tmp/tinyiot.log
 ```
 
-## Updating
-
-```bash
-cd ~/Documents/nix-darwin
-git pull
-darwin-rebuild switch --flake .#<config-name>
-```
-
 ## Troubleshooting
 
-**"darwin-rebuild: command not found"** - Run the bootstrap command from step 7.
+**"darwin-rebuild: command not found"** - Run `nix run nix-darwin -- switch --flake .#<config-name>`
 
 **Service won't start** - Check logs at `/usr/local/lightctl/lightctl.err` or `/tmp/tinyiot.err`.
 
 **Homebrew casks fail on Apple Silicon** - Install Rosetta: `softwareupdate --install-rosetta`
+
+**Files conflict on first run** - Delete `/etc/nix/nix.custom.conf` and `/etc/zshenv` if they exist, then re-run.
