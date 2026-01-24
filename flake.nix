@@ -129,6 +129,26 @@
         system.defaults.screencapture.type = "png";
         system.defaults.screencapture.disable-shadow = true;
 
+        # Rectangle window manager settings
+        system.defaults.CustomUserPreferences."com.knollsoft.Rectangle" = {
+          allowAnyShortcut = true;
+          alternateDefaultShortcuts = true;
+          hideMenubarIcon = true;
+          launchOnLogin = true;
+          subsequentExecutionMode = 3;
+          unsnapRestore = 2;
+          windowSnapping = 2;
+          SUEnableAutomaticChecks = true;
+          # Shortcuts (modifierFlags 786432 = Ctrl+Opt)
+          bottomHalf = { keyCode = 38; modifierFlags = 786432; };
+          topHalf = { keyCode = 40; modifierFlags = 786432; };
+          leftHalf = { keyCode = 4; modifierFlags = 786432; };
+          rightHalf = { keyCode = 37; modifierFlags = 786432; };
+          maximize = { keyCode = 32; modifierFlags = 786432; };
+          toggleTodo = { keyCode = 11; modifierFlags = 786432; };
+          reflowTodo = { keyCode = 45; modifierFlags = 786432; };
+        };
+
         nix.enable = false;
 
         determinateNix.customSettings = {
