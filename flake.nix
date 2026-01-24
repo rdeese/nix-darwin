@@ -129,6 +129,17 @@
         system.defaults.screencapture.type = "png";
         system.defaults.screencapture.disable-shadow = true;
 
+        # Maccy clipboard manager settings
+        system.defaults.CustomUserPreferences."org.p0deje.Maccy" = {
+          showInStatusBar = false;
+          showFooter = true;
+          showSearch = true;
+          showTitle = true;
+          SUEnableAutomaticChecks = true;
+          # Popup shortcut: Cmd+Shift+C
+          "KeyboardShortcuts_popup" = ''{"carbonModifiers":4352,"carbonKeyCode":8}'';
+        };
+
         # Rectangle window manager settings
         system.defaults.CustomUserPreferences."com.knollsoft.Rectangle" = {
           allowAnyShortcut = true;
