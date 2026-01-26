@@ -392,9 +392,10 @@
             history = "history 1";
             rhd-keyboard = "sudo kanata -c ~/.config/kanata/kanata.kbd";
           };
-          initContent = ''
+          envExtra = ''
             eval "$(/opt/homebrew/bin/brew shellenv)"
-          '' + builtins.readFile ./zsh-extra.sh;
+          '';
+          initContent = builtins.readFile ./zsh-extra.sh;
         };
 
         programs.ssh = {
