@@ -57,6 +57,7 @@
           onActivation.upgrade = true;
           taps = [];
           brews = [
+            "mosh"
             "railway"
             "stripe-cli"
             "cloudflare-wrangler"
