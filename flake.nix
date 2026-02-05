@@ -63,6 +63,7 @@
             "cloudflare-wrangler"
           ];
           casks = [
+            "docker"
             "maccy"
             "rectangle"
             "1password"
