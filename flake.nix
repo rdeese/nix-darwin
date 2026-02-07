@@ -199,6 +199,14 @@
         power.sleep.display = "never";
         power.sleep.harddisk = "never";
 
+        # Disable all sleep for headless server with closed lid
+        system.activationScripts.postActivation.text = ''
+          pmset -a disablesleep 1
+          pmset -a standby 0
+          pmset -a powernap 0
+          pmset -a autopoweroff 0
+        '';
+
         # Light controls service (HTTPS on port 443)
         # TODO: Re-enable once lightctl is packaged with devenv/nix
         # launchd.daemons.lightctl = {
