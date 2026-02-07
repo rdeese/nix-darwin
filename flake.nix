@@ -400,6 +400,7 @@
             router = ''arp -a | grep $(route -n get default | awk '/gateway/{print $2}') | awk '{print $1}' | head -n 1'';
             history = "history 1";
             rhd-keyboard = "sudo kanata -c ~/.config/kanata/kanata.kbd";
+            unlock-keychain = "security unlock-keychain ~/Library/Keychains/login.keychain-db";
           };
           envExtra = ''
             eval "$(/opt/homebrew/bin/brew shellenv)"
