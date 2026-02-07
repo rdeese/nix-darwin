@@ -5,7 +5,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-ai-tools.url = "github:numtide/nix-ai-tools";
-    claude-code.url = "github:sadjow/claude-code-nix";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager = {
@@ -14,7 +13,7 @@
     };
   };
 
-  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, nix-ai-tools, claude-code, determinate, ... }:
+  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, nix-ai-tools, determinate, ... }:
     let
       # Machine-specific parameters
       machines = {
@@ -44,7 +43,6 @@
             pkgs.gh
             pkgs.kanata
             pkgs.flyctl
-            claude-code.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
             pkgs.devenv
             pkgs.uv
           ] ++ (with nix-ai-tools.packages.${pkgs.stdenv.hostPlatform.system}; [
@@ -63,7 +61,9 @@
             "cloudflare-wrangler"
           ];
           casks = [
+            "claude-code"
             "docker"
+            "google-chrome"
             "maccy"
             "rectangle"
             "1password"
