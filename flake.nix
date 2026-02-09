@@ -45,6 +45,7 @@
             pkgs.flyctl
             pkgs.devenv
             pkgs.uv
+            pkgs.awscli2
           ] ++ (with nix-ai-tools.packages.${pkgs.stdenv.hostPlatform.system}; [
             coderabbit-cli
           ]);
@@ -55,6 +56,7 @@
           onActivation.upgrade = true;
           taps = [];
           brews = [
+            "dbxcli"
             "mosh"
             "railway"
             "stripe-cli"
