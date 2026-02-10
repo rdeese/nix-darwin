@@ -56,7 +56,6 @@
           onActivation.upgrade = true;
           taps = [];
           brews = [
-            "dbxcli"
             "mosh"
             "railway"
             "stripe-cli"
