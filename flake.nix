@@ -69,6 +69,7 @@
             "maccy"
             "rectangle"
             "1password"
+            "1password-cli"
             "arc"
             "iterm2"
             "karabiner-elements"
@@ -444,6 +445,13 @@
       # Workstation: primary development machine
       darwinConfigurations."rupert-mbp" = mkDarwinSystem {
         machine = machines.workstation;
+        extraModules = [
+          {
+            home-manager.users.${machines.workstation.username}.programs.zsh.envExtra = ''
+              export GEARFLOW_WORKSPACE=~/Documents/Gearflow
+            '';
+          }
+        ];
       };
 
       # Homebase: server machine running smart home services
