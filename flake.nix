@@ -46,6 +46,7 @@
             pkgs.devenv
             pkgs.uv
             pkgs.awscli2
+            pkgs.ffmpeg
           ] ++ (with nix-ai-tools.packages.${pkgs.stdenv.hostPlatform.system}; [
             coderabbit-cli
           ]);
@@ -54,12 +55,15 @@
           enable = true;
           onActivation.cleanup = "uninstall";
           onActivation.upgrade = true;
-          taps = [];
+          taps = [
+            "steipete/tap"
+          ];
           brews = [
             "mosh"
             "railway"
             "stripe-cli"
             "cloudflare-wrangler"
+            "steipete/tap/imsg"
           ];
           casks = [
             "docker"
