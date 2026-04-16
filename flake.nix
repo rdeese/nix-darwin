@@ -63,7 +63,6 @@
             "cloudflare-wrangler"
           ];
           casks = [
-            "claude-code"
             "docker"
             "google-chrome"
             "maccy"
@@ -80,7 +79,6 @@
             "dbeaver-community"
             "loom"
             "nordvpn"
-            "claude"
             "fathom"
             "microsoft-excel"
             "raspberry-pi-imager"
