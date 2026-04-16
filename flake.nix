@@ -405,6 +405,7 @@
           };
           envExtra = ''
             eval "$(/opt/homebrew/bin/brew shellenv)"
+            export PATH="$HOME/.local/bin:$PATH"
           '';
           initContent = builtins.readFile ./zsh-extra.sh;
         };
