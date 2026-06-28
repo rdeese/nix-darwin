@@ -4,7 +4,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
-    nix-ai-tools.url = "github:numtide/nix-ai-tools";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager = {
@@ -13,7 +12,7 @@
     };
   };
 
-  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, nix-ai-tools, determinate, ... }:
+  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, determinate, ... }:
     let
       # Machine-specific parameters
       machines = {
@@ -47,9 +46,13 @@
             pkgs.uv
             pkgs.awscli2
             pkgs.ffmpeg
-          ] ++ (with nix-ai-tools.packages.${pkgs.stdenv.hostPlatform.system}; [
-            coderabbit-cli
-          ]);
+          ];
+
+        # Some tools are intentionally NOT in nix or homebrew: they ship their own
+        # self-updaters and lag in package managers, so we use their native installers.
+        #   - Claude Code + CodeRabbit CLI  -> ~/.local/bin (self-updating)
+        #   - Linear.app                    -> /Applications (self-updating)
+        # Their absence from the lists below is deliberate, not an oversight.
 
         homebrew = {
           enable = true;
@@ -57,16 +60,37 @@
           onActivation.upgrade = true;
           taps = [
             "steipete/tap"
+            "hashicorp/tap"
+            "mistertea/et"
           ];
           brews = [
+            # network / dev CLIs
             "mosh"
             "railway"
             "stripe-cli"
             "cloudflare-wrangler"
             "steipete/tap/imsg"
+            # data / docs / infra tools
+            "duckdb"
+            "pandoc"
+            "git-crypt"
+            "hashicorp/tap/terraform"
+            "mise"
+            "actionlint"
+            "imessage-exporter"
+            "mistertea/et/et"
+            # build tooling (currently top-level installs; kept so a rebuild with
+            # cleanup="uninstall" doesn't remove them — prune any you don't use)
+            "cmake"
+            "automake"
+            "libtool"
+            "pkgconf"
+            "poppler"
+            "curl"
+            "libsodium"
           ];
           casks = [
-            "docker"
+            "docker-desktop"
             "google-chrome"
             "maccy"
             "rectangle"
@@ -75,7 +99,6 @@
             "arc"
             "iterm2"
             "karabiner-elements"
-            "linear-linear"
             "slack"
             "zoom"
             "selfcontrol"
@@ -89,6 +112,7 @@
             "transmission"
             "typora"
             "vlc"
+            "gcloud-cli"
           ];
         };
 
@@ -97,7 +121,9 @@
           { app = "/Applications/Arc.app"; }
           { app = "/Applications/Linear.app"; }
           { app = "/Applications/iTerm.app"; }
+          { app = "/Applications/Claude.app"; }
           { app = "/Applications/Slack.app"; }
+          { app = "/System/Applications/Music.app"; }
           { spacer = { small = true; }; }
         ];
 
