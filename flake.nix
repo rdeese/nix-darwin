@@ -6,14 +6,27 @@
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    # Pin the devenv CLI to the last 1.x release. The gf repos commit a devenv.lock
+    # whose module is pinned at a 1.x-era rev (ec805a5, 2025-12); a 2.x CLI (which
+    # nixpkgs-unstable now ships) can't evaluate it — `git-hooks.configPath` is
+    # missing — so every slot's `devenv up` dies before postgres starts. v1.11.2 is
+    # the last 1.x release and matches the committed module. Do NOT follow nixpkgs
+    # here: devenv's own pinned nixpkgs is what its cachix binary cache is built
+    # against, so overriding it would force a from-source rebuild. (GEA-4077 tracks
+    # the fleet-wide 1.x-vs-2.x decision.)
+    devenv.url = "github:cachix/devenv/v1.11.2";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, determinate, ... }:
+  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, determinate, devenv, ... }:
     let
+      # Last 1.x devenv CLI, pinned in inputs above (matches the repos' committed
+      # devenv.lock module; 2.x can't evaluate it). Both machines are aarch64.
+      devenvCli = devenv.packages."aarch64-darwin".devenv;
+
       # Machine-specific parameters
       machines = {
         workstation = {
@@ -42,7 +55,7 @@
             pkgs.gh
             pkgs.kanata
             pkgs.flyctl
-            pkgs.devenv
+            devenvCli
             pkgs.uv
             pkgs.awscli2
             pkgs.ffmpeg
