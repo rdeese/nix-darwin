@@ -51,7 +51,8 @@
         # Some tools are intentionally NOT in nix or homebrew: they ship their own
         # self-updaters and lag in package managers, so we use their native installers.
         #   - Claude Code + CodeRabbit CLI  -> ~/.local/bin (self-updating)
-        #   - Linear.app                    -> /Applications (self-updating)
+        #   - Linear.app, Fathom.app        -> /Applications (self-updating Electron
+        #       apps whose homebrew cask DMG URLs go stale and 404 on rebuild)
         # Their absence from the lists below is deliberate, not an oversight.
 
         homebrew = {
@@ -105,7 +106,6 @@
             "dbeaver-community"
             "loom"
             "nordvpn"
-            "fathom"
             "microsoft-excel"
             "raspberry-pi-imager"
             "tailscale-app"
