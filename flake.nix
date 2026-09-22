@@ -448,6 +448,17 @@
           envExtra = ''
             eval "$(/opt/homebrew/bin/brew shellenv)"
             export PATH="$HOME/.local/bin:$PATH"
+
+            # Shells that are not login sessions (Claude Code's Bash tool, cron, anything
+            # spawned outside tmux) inherit no SSH_AUTH_SOCK, so ssh to github fails with
+            # "Permission denied (publickey)" even though the launchd agent holds the key
+            # from the keychain. Point them at the launchd agent socket when it is unset.
+            if [ -z "$SSH_AUTH_SOCK" ]; then
+              for _s in /private/tmp/com.apple.launchd.*/Listeners; do
+                if [ -S "$_s" ]; then export SSH_AUTH_SOCK="$_s"; break; fi
+              done
+              unset _s
+            fi
           '';
           initContent = builtins.readFile ./zsh-extra.sh;
         };
